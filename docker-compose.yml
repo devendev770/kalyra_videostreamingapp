@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0-jammy
+    container_name: kalyra-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    container_name: kalyra-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: kalyra-server
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+      - "1935:1935"
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      # Use docker DNS name for local compose setup, or defaults from env_file
+      - MONGODB_URI=mongodb://mongodb:27017/streamvibe
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_TLS=false
+      - FFMPEG_PATH=/usr/bin/ffmpeg
+    env_file:
+      - ./server/.env
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - server-media:/usr/src/app/media
+      - server-uploads:/usr/src/app/uploads
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: kalyra-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:
+  redis-data:
+  server-media:
+  server-uploads:

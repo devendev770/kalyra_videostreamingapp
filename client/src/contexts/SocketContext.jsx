@@ -15,7 +15,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     const token = sessionStorage.getItem('accessToken');
-    const socketUrl = window.location.origin;
+    const socketUrl = import.meta.env.VITE_WS_URL || window.location.origin;
 
     const socketInstance = io(socketUrl, {
       auth: { token },
