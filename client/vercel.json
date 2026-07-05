@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://kalyra-api.onrender.com/api/:path*"
+      "destination": "https://kalyra-videostreamingapp.onrender.com/api/:path*"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "https://kalyra-api.onrender.com/uploads/:path*"
+      "destination": "https://kalyra-videostreamingapp.onrender.com/uploads/:path*"
     }
   ]
 }
