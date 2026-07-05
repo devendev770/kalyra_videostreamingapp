@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+/* ============ Kalyra Design System ============ */
+@theme {
+  --color-primary: #c9a048;         /* Gold */
+  --color-primary-hover: #d9b65c;   /* Light Gold */
+  --color-primary-dark: #8b6914;    /* Dark Gold */
+  --color-accent: #e8c86e;          /* Bright Gold */
+  --color-surface: #09090b;         /* Zinc-950 (Obsidian Background) */
+  --color-surface-light: #161619;   /* Zinc-900 (Sidebar/Header) */
+  --color-surface-card: #202024;    /* Cards / Popovers */
+  --color-surface-hover: #2d2d30;   /* Interaction highlight */
+  --color-border: #27272a;          /* Zinc-800 borders */
+  --color-text-primary: #f4f4f5;    /* High contrast text */
+  --color-text-secondary: #a1a1aa;  /* Muted text */
+  --color-text-muted: #71717a;      /* Disabled/Placeholder text */
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+}
+
+/* ============ Base Styles ============ */
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--color-surface); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-surface-hover); }
+
+/* ============ Utility Classes ============ */
+.glass {
+  background: rgba(22, 22, 25, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(201, 160, 72, 0.1);
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #e8c547, #c9a048);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shimmer {
+  background: linear-gradient(90deg, var(--color-surface-light) 25%, var(--color-border) 50%, var(--color-surface-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.mask-image {
+  mask-image: linear-gradient(to right, transparent, white 16px, white calc(100% - 16px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, white 16px, white calc(100% - 16px), transparent);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+.animate-slideUp { animation: slideUp 0.4s ease-out; }
+
+/* ============ Skeleton Loader ============ */
+.skeleton { border-radius: 8px; }
+.skeleton-text { height: 14px; border-radius: 4px; }
+.skeleton-title { height: 20px; width: 70%; border-radius: 4px; }
+.skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
+
+/* ============ Responsive Grid ============ */
+.video-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .video-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+}
+
+
