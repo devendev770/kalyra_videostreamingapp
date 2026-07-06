@@ -8,6 +8,7 @@ import { AppError } from '../middlewares/errorHandler.js';
 import { videoQueue } from '../jobs/videoProcessor.js';
 import { cacheGet, cacheSet, cacheDel, redis } from '../config/redis.js';
 import { CHUNKS_DIR, TEMP_DIR } from '../middlewares/upload.js';
+import { uploadToB2 } from '../config/b2.js';
 
 export const trackAuthenticView = async (videoId, req) => {
   try {
@@ -111,8 +112,15 @@ export const completeUpload = async (req, res, next) => {
     // Clean up chunks
     fs.rmSync(chunkDir, { recursive: true, force: true });
 
-    // Build original URL for immediate playback
-    const videoUrl = `/uploads/temp/${video._id}.mp4`;
+    // Upload original MP4 to Backblaze B2 for persistent cloud storage
+    let videoUrl = `/uploads/temp/${video._id}.mp4`;
+    const b2Key = `videos/${video._id}/original.mp4`;
+    try {
+      const b2Result = await uploadToB2(outputPath, b2Key, 'video/mp4');
+      videoUrl = b2Result.url;
+    } catch (b2Err) {
+      console.error('B2 original upload failed, falling back to local URL:', b2Err.message);
+    }
 
     // Add to processing queue
     await videoQueue.add({
@@ -122,6 +130,7 @@ export const completeUpload = async (req, res, next) => {
     });
 
     video.originalUrl = videoUrl;
+    video.originalKey = b2Key;
     video.status = 'published';
     await video.save();
 
@@ -141,11 +150,20 @@ export const uploadDirect = async (req, res, next) => {
     if (!req.file) throw new AppError('No video file provided', 400);
 
     const hasFFmpeg = !!process.env.FFMPEG_PATH;
+    const videoId = new (await import('mongoose')).default.Types.ObjectId();
 
-    // Build the video URL for serving the uploaded file
-    const videoUrl = `/uploads/temp/${req.file.filename}`;
+    // Upload original MP4 to Backblaze B2 for persistent cloud storage
+    let videoUrl = `/uploads/temp/${req.file.filename}`;
+    const b2Key = `videos/${videoId}/original${path.extname(req.file.originalname) || '.mp4'}`;
+    try {
+      const b2Result = await uploadToB2(req.file.path, b2Key, req.file.mimetype || 'video/mp4');
+      videoUrl = b2Result.url;
+    } catch (b2Err) {
+      console.error('B2 original upload failed, falling back to local URL:', b2Err.message);
+    }
 
     const video = await Video.create({
+      _id: videoId,
       userId: req.user._id,
       title: req.body.title || 'Untitled Video',
       description: req.body.description || '',
@@ -154,6 +172,7 @@ export const uploadDirect = async (req, res, next) => {
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
       originalUrl: videoUrl,
+      originalKey: b2Key,
       isShort: req.body.isShort === 'true' || req.body.isShort === true,
       status: 'published', // Publish immediately for instant viewing
     });

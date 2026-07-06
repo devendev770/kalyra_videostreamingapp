@@ -41,9 +41,8 @@ videoQueue.process(2, async (job) => {
     // Check if FFmpeg is available
     if (!process.env.FFMPEG_PATH) {
       logger.warn(`FFmpeg not available — publishing video ${videoId} without transcoding`);
-      const videoUrl = `/uploads/temp/${path.basename(filePath)}`;
+      // originalUrl already points to B2 cloud storage — just ensure it's published
       await Video.findByIdAndUpdate(videoId, {
-        originalUrl: videoUrl,
         status: 'published',
         processingProgress: 100,
       });
@@ -112,7 +111,7 @@ videoQueue.process(2, async (job) => {
       thumbnailUrl: thumbnailUrls[0] || '',
       autoThumbnails: thumbnailUrls,
       duration: Math.round(hlsResult.duration),
-      status: 'draft',
+      status: 'published',
       processingProgress: 100,
     });
 
@@ -133,15 +132,13 @@ videoQueue.process(2, async (job) => {
   } catch (error) {
     logger.error(`Video processing failed: ${videoId}`, error);
     
-    // Fallback: publish video from original file so it's still watchable
+    // Fallback: publish video with existing originalUrl (already on B2 cloud storage)
     try {
-      const videoUrl = `/uploads/temp/${path.basename(filePath)}`;
-      const existsOnDisk = fs.existsSync(filePath);
       const video = await Video.findById(videoId);
       
       if (video) {
         await Video.findByIdAndUpdate(videoId, {
-          originalUrl: existsOnDisk ? videoUrl : video.originalUrl,
+          // Keep the existing originalUrl — it already points to B2 cloud storage
           status: 'published',
           processingProgress: 100,
           processingError: `Processing failed (${error.message}). Published with original quality.`,
