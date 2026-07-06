@@ -1,15 +1,21 @@
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL || '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_URL,
   withCredentials: true,
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // Request interceptor — attach access token
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem('accessToken');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -26,9 +32,10 @@ const processQueue = (error, token = null) => {
 };
 
 api.interceptors.response.use(
-  (res) => res,
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -38,13 +45,23 @@ api.interceptors.response.use(
           return api(originalRequest);
         });
       }
+
       originalRequest._retry = true;
       isRefreshing = true;
+
       try {
-        const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+        const { data } = await axios.post(
+          `${API_URL}/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
+
         sessionStorage.setItem('accessToken', data.accessToken);
+
         processQueue(null, data.accessToken);
+
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
@@ -55,6 +72,7 @@ api.interceptors.response.use(
         isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
   }
 );
