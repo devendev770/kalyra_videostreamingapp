@@ -19,7 +19,24 @@ const getYouTubeId = (url) => {
   return match ? match[1] : null;
 };
 
-const CustomVideoPlayer = ({ src, flvSrc, poster, onProgress, isLive }) => {
+const resolveMediaUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('blob:')) return url;
+  const apiUrl = import.meta.env.VITE_API_URL;
+  if (apiUrl && apiUrl.startsWith('http')) {
+    try {
+      const urlObj = new URL(apiUrl);
+      return `${urlObj.origin}${url}`;
+    } catch(e) {}
+  }
+  return url;
+};
+
+const CustomVideoPlayer = ({ src: rawSrc, flvSrc: rawFlvSrc, poster: rawPoster, onProgress, isLive }) => {
+  const src = resolveMediaUrl(rawSrc);
+  const flvSrc = resolveMediaUrl(rawFlvSrc);
+  const poster = resolveMediaUrl(rawPoster);
+
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const containerRef = useRef(null);
