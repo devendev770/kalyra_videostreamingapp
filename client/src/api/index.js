@@ -148,3 +148,22 @@ export const adminAPI = {
   getCredentials: () => api.get('/admin/credentials'),
   updateCredentials: (data) => api.put('/admin/credentials', data),
 };
+
+// Spatial Rooms
+export const spatialAPI = {
+  create: (data) => api.post('/spatial', data),
+  getPublic: () => api.get('/spatial/public'),
+  getRoom: (roomCode) => api.get(`/spatial/${roomCode}`),
+  join: (roomCode) => api.post(`/spatial/join/${roomCode}`),
+  leave: (roomCode) => api.post(`/spatial/leave/${roomCode}`),
+  end: (roomCode) => api.post(`/spatial/end/${roomCode}`),
+};
+
+// Dreamscape Canvas
+export const dreamscapeAPI = {
+  getCanvas: (roomId) => api.get(`/dreamscape/room/${roomId}`),
+  getCanvasById: (id) => api.get(`/dreamscape/${id}`),
+  addAsset: (roomId, data) => api.post(`/dreamscape/room/${roomId}/asset`, data),
+  getInk: (roomId) => api.get(`/dreamscape/room/${roomId}/ink`),
+};
+

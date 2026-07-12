@@ -34,6 +34,8 @@ import LiveRoom from './pages/LiveRoom';
 import Vibes from './pages/Vibes';
 import WatchParty from './pages/WatchParty';
 import WatchPartyRoom from './pages/WatchPartyRoom';
+import SpatialLounge from './pages/SpatialLounge';
+import SpatialRoom from './pages/SpatialRoom';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -81,6 +83,15 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <WatchPartyRoom />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="spatial" element={<SpatialLounge />} />
+              <Route
+                path="spatial/:roomCode"
+                element={
+                  <ProtectedRoute>
+                    <SpatialRoom />
                   </ProtectedRoute>
                 }
               />

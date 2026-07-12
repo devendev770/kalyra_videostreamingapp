@@ -11,6 +11,24 @@ import { Link } from 'react-router-dom';
 const Subscriptions = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
 
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error
+  } = useInfiniteQuery({
+    queryKey: ['subscriptions-feed'],
+    queryFn: ({ pageParam = 1 }) => subscriptionAPI.getFeed({ page: pageParam, limit: 12 }),
+    getNextPageParam: (lastPage) => {
+      const { page, pages } = lastPage.data.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    enabled: isAuthenticated,
+  });
+
   if (!isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 animate-fadeIn">
@@ -31,23 +49,6 @@ const Subscriptions = () => {
       </div>
     );
   }
-
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    error
-  } = useInfiniteQuery({
-    queryKey: ['subscriptions-feed'],
-    queryFn: ({ pageParam = 1 }) => subscriptionAPI.getFeed({ page: pageParam, limit: 12 }),
-    getNextPageParam: (lastPage) => {
-      const { page, pages } = lastPage.data.pagination;
-      return page < pages ? page + 1 : undefined;
-    },
-  });
 
   const videos = data?.pages.flatMap((page) => page.data.videos) || [];
 

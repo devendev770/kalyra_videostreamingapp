@@ -15,7 +15,8 @@ import {
   Share2,
   Bookmark,
   MessageSquareCode,
-  Upload
+  Upload,
+  Map
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -38,6 +39,7 @@ const Sidebar = () => {
     { section: 'Social', items: [
       { name: 'Community Feed', path: '/community', icon: MessageSquareCode },
       { name: 'Watch Party', path: '/watch-party', icon: Users },
+      { name: 'Spatial Lounge', path: '/spatial', icon: Map },
     ]}
   ];
 

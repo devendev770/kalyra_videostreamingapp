@@ -111,6 +111,76 @@ export const initSocketIO = (server) => {
       socket.to(`video:${videoId}`).emit('comment:new', comment);
     });
 
+    // ============ SPATIAL ROOM EVENTS ============
+    socket.on('spatial:join', ({ roomCode, userId, displayName, avatar, color }) => {
+      socket.join(`spatial:${roomCode}`);
+      socket.to(`spatial:${roomCode}`).emit('spatial:user_joined', {
+        userId, displayName, avatar, color,
+      });
+      logger.debug(`User ${userId} joined spatial room: ${roomCode}`);
+    });
+
+    socket.on('spatial:leave', ({ roomCode, userId }) => {
+      socket.leave(`spatial:${roomCode}`);
+      socket.to(`spatial:${roomCode}`).emit('spatial:user_left', { userId });
+    });
+
+    // Position update — broadcast to all others in the room
+    socket.on('spatial:move', ({ roomCode, userId, x, y }) => {
+      socket.to(`spatial:${roomCode}`).emit('spatial:move', { userId, x, y });
+    });
+
+    // Megaphone — host broadcasts to entire room
+    socket.on('spatial:megaphone', ({ roomCode, userId, active }) => {
+      io.to(`spatial:${roomCode}`).emit('spatial:megaphone', { userId, active });
+    });
+
+    // Spotlight / Tractor Beam — host pulls a user to center
+    socket.on('spatial:spotlight', ({ roomCode, targetUserId }) => {
+      io.to(`spatial:${roomCode}`).emit('spatial:spotlight', { targetUserId });
+    });
+
+    // Chat message in spatial room
+    socket.on('spatial:chat', ({ roomCode, message, userId, username, avatar }) => {
+      io.to(`spatial:${roomCode}`).emit('spatial:chat', {
+        message, userId, username, avatar, timestamp: new Date(),
+      });
+    });
+
+    // Reaction burst in spatial room
+    socket.on('spatial:reaction', ({ roomCode, emoji, userId, x, y }) => {
+      io.to(`spatial:${roomCode}`).emit('spatial:reaction', { emoji, userId, x, y });
+    });
+
+    // ============ DREAMSCAPE CANVAS EVENTS ============
+    socket.on('canvas:join', (roomId) => {
+      socket.join(`canvas:${roomId}`);
+    });
+
+    socket.on('canvas:leave', (roomId) => {
+      socket.leave(`canvas:${roomId}`);
+    });
+
+    // Asset placed on canvas
+    socket.on('canvas:add_asset', ({ roomId, asset }) => {
+      socket.to(`canvas:${roomId}`).emit('canvas:add_asset', asset);
+    });
+
+    // Asset moved/resized on canvas
+    socket.on('canvas:move_asset', ({ roomId, assetId, x, y }) => {
+      socket.to(`canvas:${roomId}`).emit('canvas:move_asset', { assetId, x, y });
+    });
+
+    // Drawing path added
+    socket.on('canvas:draw', ({ roomId, path }) => {
+      socket.to(`canvas:${roomId}`).emit('canvas:draw', path);
+    });
+
+    // Drawing in progress (live cursor streaming)
+    socket.on('canvas:draw_progress', ({ roomId, pathId, point }) => {
+      socket.to(`canvas:${roomId}`).emit('canvas:draw_progress', { pathId, point });
+    });
+
     // ============ NOTIFICATION EVENTS ============
     // Notifications are pushed server-side via getIO()
 

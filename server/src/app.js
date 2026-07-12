@@ -26,6 +26,8 @@ import communityRoutes from './routes/community.routes.js';
 import studioRoutes from './routes/studio.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import searchRoutes from './routes/search.routes.js';
+import spatialRoomRoutes from './routes/spatialRoom.routes.js';
+import dreamscapeRoutes from './routes/dreamscape.routes.js';
 
 const app = express();
 
@@ -85,9 +87,12 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
   },
 }));
 
-// Health check
+// Health check & welcome
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() });
+});
+app.get('/api', (req, res) => {
+  res.json({ status: 'active', message: 'Welcome to Kalyra Video Streaming API' });
 });
 
 // API Routes
@@ -105,6 +110,8 @@ app.use('/api/community', communityRoutes);
 app.use('/api/studio', studioRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/spatial', spatialRoomRoutes);
+app.use('/api/dreamscape', dreamscapeRoutes);
 
 // Error handling
 app.use(notFound);
