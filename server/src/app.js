@@ -87,12 +87,9 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
   },
 }));
 
-// Health check & welcome
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() });
-});
-app.get('/api', (req, res) => {
-  res.json({ status: 'active', message: 'Welcome to Kalyra Video Streaming API' });
 });
 
 // API Routes
